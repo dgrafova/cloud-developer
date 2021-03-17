@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@types/history": "^4.7.8",
     "axios": "^0.18.1",
     "dateformat": "^3.0.3",
     "immutability-helper": "^3.0.1",
