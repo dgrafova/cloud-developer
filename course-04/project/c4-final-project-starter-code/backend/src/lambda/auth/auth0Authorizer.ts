@@ -18,6 +18,7 @@ export const handler = middy(async (event: CustomAuthorizerEvent, context): Prom
       event.authorizationToken,
       context.AUTH0_SECRET[secretField]
     )
+    console.log('Event:', event)
     console.log('User was authorized', decodedToken)
 
     return {
