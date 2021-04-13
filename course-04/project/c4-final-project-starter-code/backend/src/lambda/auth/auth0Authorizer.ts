@@ -1,28 +1,18 @@
 import { CustomAuthorizerEvent, CustomAuthorizerResult } from 'aws-lambda'
 import 'source-map-support/register'
-import * as middy from 'middy'
-import { cors } from 'middy/middlewares'
-import { secretsManager } from 'middy/middlewares'
 
 import { verify } from 'jsonwebtoken'
-import { JwtPayload } from '../../auth/JwtPayload'
+import { JwtToken } from '../../auth/JwtToken'
 
-const secretId = process.env.AUTH_0_SECRET_ID
-const secretField = process.env.AUTH_0_SECRET_FIELD
+const cert = ``
 
-
-
-export const handler = middy(async (event: CustomAuthorizerEvent, context): Promise<CustomAuthorizerResult> => {
+export const handler = async (event: CustomAuthorizerEvent): Promise<CustomAuthorizerResult> => {
   try {
-    const decodedToken = verifyToken(
-      event.authorizationToken,
-      context.AUTH0_SECRET[secretField]
-    )
-    console.log('Event:', event)
-    console.log('User was authorized', decodedToken)
+    const jwtToken = verifyToken(event.authorizationToken)
+    console.log('User was authorized', jwtToken)
 
     return {
-      principalId: decodedToken.sub,
+      principalId: jwtToken.sub,
       policyDocument: {
         Version: '2012-10-17',
         Statement: [
@@ -35,7 +25,7 @@ export const handler = middy(async (event: CustomAuthorizerEvent, context): Prom
       }
     }
   } catch (e) {
-    console.log('User was not authorized', e.message)
+    console.log('User authorized', e.message)
 
     return {
       principalId: 'user',
@@ -51,9 +41,9 @@ export const handler = middy(async (event: CustomAuthorizerEvent, context): Prom
       }
     }
   }
-})
+}
 
-function verifyToken(authHeader: string, secret: string): JwtPayload {
+function verifyToken(authHeader: string): JwtToken {
   if (!authHeader)
     throw new Error('No authentication header')
 
@@ -63,20 +53,6 @@ function verifyToken(authHeader: string, secret: string): JwtPayload {
   const split = authHeader.split(' ')
   const token = split[1]
 
-  return verify(token, secret) as JwtPayload
+  return verify(token, cert, { algorithms: ['RS256'] }) as JwtToken
 }
 
-handler
-  .use(cors());
-
-handler.use(
-  secretsManager({
-    cache: true,
-    cacheExpiryInMillis: 60000,
-    // Throw an error if can't read the secret
-    throwOnFailedCall: true,
-    secrets: {
-      AUTH0_SECRET: secretId
-    }
-  })
-)

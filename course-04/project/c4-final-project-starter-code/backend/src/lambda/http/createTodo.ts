@@ -3,6 +3,7 @@ import 'source-map-support/register'
 import { APIGatewayProxyEvent, APIGatewayProxyHandler, APIGatewayProxyResult } from 'aws-lambda'
 
 import { CreateTodoRequest } from '../../requests/CreateTodoRequest'
+import { getUserId } from '../utils';
 
 const AWS = require('aws-sdk');
 const uuid = require('uuid');
@@ -14,10 +15,13 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
   console.log('Processing incoming event: ', event);
 
 const todoId = uuid.v4();
+const timestamp = new Date().toISOString();
 const newTodo: CreateTodoRequest = JSON.parse(event.body);
 
 const newItem = {
   todoId: todoId,
+  createdAt: timestamp,
+  userId: getUserId(event),
   ...newTodo
 }
 
