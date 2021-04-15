@@ -8,35 +8,15 @@ import {
 
 import { CreateTodoRequest } from '../../requests/CreateTodoRequest'
 import { getUserId } from '../utils'
-
-const AWS = require('aws-sdk')
-const uuid = require('uuid')
-
-const dynamoDBClient = new AWS.DynamoDB.DocumentClient()
-const grafTodoApp = process.env.TODO_TABLE
+import { createTodo } from '../../businessLogic/todos'
 
 export const handler: APIGatewayProxyHandler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
-  console.log('Processing incoming event: ', event)
-
-  const todoId = uuid.v4()
-  const timestamp = new Date().toISOString()
   const newTodo: CreateTodoRequest = JSON.parse(event.body)
+  const newItem = await createTodo(newTodo, getUserId(event))
 
-  const newItem = {
-    todoId: todoId,
-    createdAt: timestamp,
-    userId: getUserId(event),
-    ...newTodo
-  }
-
-  await dynamoDBClient
-    .put({
-      TableName: grafTodoApp,
-      Item: newItem
-    })
-    .promise()
+  console.log('New Item: ', newItem)
 
   return {
     statusCode: 201,

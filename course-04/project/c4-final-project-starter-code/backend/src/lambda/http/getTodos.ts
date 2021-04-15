@@ -4,24 +4,17 @@ import {
   APIGatewayProxyResult,
   APIGatewayProxyHandler
 } from 'aws-lambda'
-
-const AWS = require('aws-sdk')
-
-const dynamoDBClient = new AWS.DynamoDB.DocumentClient()
-const grafTodoApp = process.env.TODO_TABLE
+import { getUserId } from '../utils'
+import { getTodos } from '../../businessLogic/todos'
 
 export const handler: APIGatewayProxyHandler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
+  const userId = getUserId(event)
   console.log('Processing incoming event: ', event)
+  const todos = await getTodos(userId)
 
-  const result = await dynamoDBClient
-    .scan({
-      TableName: grafTodoApp
-    })
-    .promise()
-
-  const items = result.Items
+  const items = todos.Items
 
   return {
     statusCode: 200,

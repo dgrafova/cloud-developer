@@ -6,11 +6,7 @@ import {
   APIGatewayProxyHandler
 } from 'aws-lambda'
 import { getUserId } from '../utils'
-
-const AWS = require('aws-sdk')
-
-const dynamoDBClient = new AWS.DynamoDB.DocumentClient()
-const grafTodoApp = process.env.TODO_TABLE
+import { deleteTodo } from '../../businessLogic/todos'
 
 export const handler: APIGatewayProxyHandler = async (
   event: APIGatewayProxyEvent
@@ -20,7 +16,9 @@ export const handler: APIGatewayProxyHandler = async (
 
   console.log('Deleting the todo with an id ', todoId)
 
-  let response: APIGatewayProxyResult = {
+  await deleteTodo(todoId, userId)
+
+  return {
     statusCode: 200,
     headers: {
       'Access-Control-Allow-Origin': '*',
@@ -28,26 +26,4 @@ export const handler: APIGatewayProxyHandler = async (
     },
     body: ''
   }
-
-  await dynamoDBClient
-    .delete(
-      {
-        TableName: grafTodoApp,
-        Key: { userId, todoId }
-      },
-      function (err, data) {
-        if (err) {
-          const error = JSON.stringify(err, null, 2)
-          console.error('Unable to delete the todo. Error JSON:', error)
-          response.statusCode = 400
-          response.body = `'error' ${error}`
-        } else {
-          const updatedItem = JSON.stringify(data, null, 2)
-          console.log('Successfully deleted:', updatedItem)
-        }
-      }
-    )
-    .promise()
-
-  return response
 }

@@ -6,6 +6,12 @@ plugins:
   - serverless-iam-roles-per-function
 
 provider:
+
+  #Enabling X-Ray tracing
+  tracing:
+    lambda: true
+    apiGateway : true
+
   name: aws
   runtime: nodejs12.x
 
@@ -34,13 +40,7 @@ functions:
     iamRoleStatements:
       - Effect: Allow
         Action:
-          - dynamodb:Scan
-
-        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODO_TABLE}
-      - Effect: Allow
-        Action:
-          - dynamodb:Scan
-          - dynamodb:GetItem
+          - dynamodb:Query
         Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODO_TABLE}/index/userIdIndex
 
   CreateTodo:
