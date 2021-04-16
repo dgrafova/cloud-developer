@@ -1,0 +1,18 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+      "title": "CreateTodo",
+      "type": "object",
+      "properties": {
+        "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "favourite": {
+            "type": "boolean"
+          }
+      },
+      "required": ["name", "description", "favourite"],
+      "additionalProperties": false
+}

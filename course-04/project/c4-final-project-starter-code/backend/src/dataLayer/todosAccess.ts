@@ -30,6 +30,10 @@ export class TodosAccess {
       })
       .promise()
 
+    console.log('UserIdIndex: ', this.userIdIndex)
+    console.log('UserId: ', userId)
+    console.log('Rezepte: ', todos)
+
     return todos
   }
 
